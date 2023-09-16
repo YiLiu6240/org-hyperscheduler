@@ -77,6 +77,9 @@ function onClickNavi(e) {
     case 'change-week':
       calendar.changeView('week', true);
       break;
+    case 'change-month':
+      calendar.changeView('month', true);
+      break;
     default:
       return;
   }
@@ -111,10 +114,10 @@ let calendar = new tui.Calendar('#calendar', {
     month: {
       visibleWeeksCount: 2 // visible week count in monthly
     },
-    
+
     useCreationPopup: true,
     useDetailPopup: true,
-    taskView: false, 
+    taskView: false,
     usageStatistics: false,
     isReadOnly: false,
       week: {
@@ -132,7 +135,7 @@ calendar.on('beforeUpdateSchedule', function(event) {
     if (changes.start === undefined) {
         changes.start = updated_schedule.start;
     }
-        
+
     console.log(`schedule:` + schedule + `changes:` + changes);
 
     console.log(`Time changed to ${getUnixTimestampFromDate(changes.end)}`);
@@ -208,7 +211,7 @@ function isReadOnly() {
 }
 
 
-// -- networking stuff ---- 
+// -- networking stuff ----
 let socket = new WebSocket("ws://127.0.0.1:44445");
 
 
@@ -226,15 +229,15 @@ socket.onmessage = function(event) {
             calendar.deleteSchedule(existingEvent.id, existingEvent.calendarId, false);
         }
     }
-    
+
     schedule = [];
     console.log(`[message] Data received from server: ${event.data}`);
     agenda = JSON.parse(event.data);
     console.log(`${agenda.length} items in agenda.`);
     schedule = [];
-    
+
     for (const agendaItem of agenda) {
-        
+
         let calendarItem = {
             id:  agendaItem["ID"],
             calendarId: 1,
@@ -256,21 +259,21 @@ socket.onmessage = function(event) {
         if (agendaItem["SCHEDULED"] === undefined) {
             calendarItem.calendarId = 2;
         }
-        
+
         schedule.push(calendarItem);
     }
 
 
-    
+
     if (isReadOnly()) {
         alert("Readonly mode; please see customized-group org-hyperscheduler");
-        
+
     }
-    
+
     $("body").removeClass("loading");
-    
+
     calendar.createSchedules(schedule);
-    
+
     window.localStorage.setItem('schedule', JSON.stringify(schedule));
 };
 
